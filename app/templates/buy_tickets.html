@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Buy tickets{% endblock %}
+{% block body_class %}page-hero-bg{% endblock %}
+
+{% block extra_head %}
+<style>
+  body.page-hero-bg {
+    background-image:
+      linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.70),
+        rgba(0, 0, 0, 0.92)
+      ),
+      url("{{ url_for('static', filename='css/bg.png') }}");
+
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-layout">
+
+  <aside class="promo-panel">
+    <p class="ticket-eyebrow">Get your pass</p>
+    <h1 class="promo-title">Join the<br><span class="accent">Experience</span></h1>
+    <p class="promo-copy">Secure your ticket and be part of something unforgettable.</p>
+
+    <div class="promo-art">
+      <img src="{{ url_for('static', filename='css/bg.png') }}" alt="Event preview">
+    </div>
+
+    <ul class="promo-features">
+      <li>
+        <span class="promo-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>
+        </span>
+        <span class="promo-feature-text"><strong>Secure booking</strong><small>100% safe &amp; encrypted</small></span>
+      </li>
+      <li>
+        <span class="promo-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+        </span>
+        <span class="promo-feature-text"><strong>Instant confirmation</strong><small>Receive ticket instantly</small></span>
+      </li>
+      <li>
+        <span class="promo-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2" y="14" width="5" height="6" rx="1.5"/><rect x="17" y="14" width="5" height="6" rx="1.5"/></svg>
+        </span>
+        <span class="promo-feature-text"><strong>Support</strong><small>We're here to help</small></span>
+      </li>
+    </ul>
+  </aside>
+
+  <div class="ticket checkout-panel">
+    <div class="stepper">
+      <div class="step step-active">
+        <span class="step-circle">1</span>
+        <span class="step-label">Ticket</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step">
+        <span class="step-circle">2</span>
+        <span class="step-label">Payment</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step">
+        <span class="step-circle">3</span>
+        <span class="step-label">Confirm</span>
+      </div>
+    </div>
+
+    {% if not tiers %}
+      <p class="muted">Ticket sales haven't opened yet — check back soon.</p>
+    {% else %}
+    <form method="post" action="{{ url_for('public.checkout') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <p class="section-label">Choose your ticket</p>
+      <div class="tier-grid tier-grid-single">
+        {% for tier in tiers %}
+          <label class="tier-option tier-row">
+            <input type="radio" name="tier_id" value="{{ tier.id }}" {% if loop.first %}checked{% endif %} required>
+            <span class="tier-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"/>
+              </svg>
+            </span>
+            <span class="tier-info">
+              <span class="tier-name">{{ tier.name|upper }}</span>
+              <span class="muted tier-desc">{{ tier.description or "Access to the event" }}</span>
+            </span>
+            <span class="tier-price">&#8377;{{ "{:,}".format(tier.price_inr) }}</span>
+            <span class="tier-check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+
+      <input type="hidden" name="quantity" value="1">
+
+      <p class="section-label" style="margin-top: 28px;">Your details</p>
+
+      <label for="buyer_name">Full name</label>
+      <div class="input-icon-wrap">
+        <span class="input-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/></svg>
+        </span>
+        <input type="text" id="buyer_name" name="buyer_name" placeholder="Enter your full name" required>
+      </div>
+
+      <label for="buyer_email">Email</label>
+      <div class="input-icon-wrap">
+        <span class="input-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        </span>
+        <input type="email" id="buyer_email" name="buyer_email" placeholder="Enter your email address" required>
+      </div>
+
+      <label for="buyer_phone">Phone number</label>
+      <div class="input-icon-wrap">
+        <span class="input-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L14 13l5 2v4a1 1 0 0 1-1 1C9.5 20 4 14.5 4 5a1 1 0 0 1 1-1z"/></svg>
+        </span>
+        <input type="tel" id="buyer_phone" name="buyer_phone" placeholder="Enter your 10-digit mobile number" required>
+      </div>
+
+      <button type="submit" class="btn btn-block btn-pay">
+        Pay with PhonePe
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <p class="secure-note">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        Secure payments powered by PhonePe
+      </p>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

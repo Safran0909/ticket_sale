@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock %}
+{% block content %}
+
+<div class="ticket">
+  <p class="ticket-eyebrow">Overview</p>
+  <h1 class="ticket-title">Admin dashboard</h1>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-value">{{ total_tickets }}</div>
+      <div class="stat-label">Total tickets sold</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">&#8377;{{ "{:,}".format(total_revenue) }}</div>
+      <div class="stat-label">Total revenue</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">{{ members|length }}</div>
+      <div class="stat-label">Committee members</div>
+    </div>
+  </div>
+
+  <div class="perforation"></div>
+  <p class="ticket-eyebrow" style="margin-top:0;">Sales, last 14 days</p>
+  <canvas id="trendChart" height="90"></canvas>
+</div>
+
+<div class="grid-2">
+
+  <div class="ticket">
+    <p class="ticket-eyebrow">Leaderboard</p>
+    <h2 class="ticket-title" style="font-size:22px;">Members</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Code</th><th>Sold</th><th>Revenue</th><th></th></tr></thead>
+      <tbody>
+        {% for m in leaderboard %}
+        <tr class="{{ 'rank-1' if loop.first and m.total_tickets_sold > 0 }}">
+          <td>{{ m.name }}
+            {% if m.is_admin %}<span class="badge badge-admin">Admin</span>{% endif %}
+            {% if not m.is_active_member %}<span class="badge badge-inactive">Inactive</span>{% endif %}
+          </td>
+          <td><span style="font-family: var(--font-mono); font-size: 12px;">{{ m.ref_code }}</span></td>
+          <td>{{ m.total_tickets_sold }}</td>
+          <td>&#8377;{{ "{:,}".format(m.total_revenue) }}</td>
+          <td>
+            <form method="post" action="{{ url_for('admin.toggle_member_active', member_id=m.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-ghost btn-small">
+                {{ 'Deactivate' if m.is_active_member else 'Reactivate' }}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="perforation"></div>
+    <p class="ticket-eyebrow" style="margin-top:0;">Add a member</p>
+    <form method="post" action="{{ url_for('admin.create_member') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="name">Full name</label>
+      <input type="text" id="name" name="name" required>
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+      <button type="submit" class="btn" style="margin-top: 16px;">Add member &amp; generate QR</button>
+    </form>
+  </div>
+
+  <div class="ticket">
+    <p class="ticket-eyebrow">Inventory</p>
+    <h2 class="ticket-title" style="font-size:22px;">Ticket tiers</h2>
+    <table>
+      <thead><tr><th>Tier</th><th>Price</th><th>Sold</th><th>Left</th><th></th></tr></thead>
+      <tbody>
+        {% for t in tiers %}
+        <tr>
+          <td>{{ t.name }}
+            {% if not t.is_active %}<span class="badge badge-inactive">Off sale</span>{% endif %}
+          </td>
+          <td>&#8377;{{ "{:,}".format(t.price_inr) }}</td>
+          <td>{{ t.sold_count }}</td>
+          <td>{{ t.remaining }}</td>
+          <td>
+            <form method="post" action="{{ url_for('admin.toggle_tier_active', tier_id=t.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-ghost btn-small">
+                {{ 'Disable' if t.is_active else 'Enable' }}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="perforation"></div>
+    <p class="ticket-eyebrow" style="margin-top:0;">Add a tier</p>
+    <form method="post" action="{{ url_for('admin.create_tier') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="tier_name">Tier name</label>
+      <input type="text" id="tier_name" name="name" placeholder="e.g. General, VIP" required>
+      <label for="tier_desc">Description (optional)</label>
+      <input type="text" id="tier_desc" name="description">
+      <div class="grid-2" style="gap:12px;">
+        <div>
+          <label for="price_inr">Price (&#8377;)</label>
+          <input type="number" id="price_inr" name="price_inr" min="1" required>
+        </div>
+        <div>
+          <label for="total_inventory">Inventory</label>
+          <input type="number" id="total_inventory" name="total_inventory" min="1" required>
+        </div>
+      </div>
+      <button type="submit" class="btn" style="margin-top: 16px;">Add tier</button>
+    </form>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+  fetch("{{ url_for('admin.sales_trend') }}")
+    .then(r => r.json())
+    .then(data => {
+      new Chart(document.getElementById('trendChart'), {
+        type: 'bar',
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: 'Tickets sold',
+            data: data.values,
+            backgroundColor: '#e2a23a',
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+    });
+</script>
+{% endblock %}

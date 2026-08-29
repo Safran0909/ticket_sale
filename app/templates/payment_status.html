@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Order status{% endblock %}
+{% block content %}
+<div class="page-narrow" style="margin: 40px auto 0;">
+  <div class="ticket" style="text-align: center;">
+    <p class="ticket-eyebrow">Order {{ order.merchant_order_id }}</p>
+    <span class="status-pill status-{{ order.status }}">{{ order.status }}</span>
+
+    <h1 class="ticket-title" style="margin-top: 16px;">
+      {% if order.status == "PAID" %}
+        You're in! &#127881;
+      {% elif order.status == "PENDING" %}
+        Payment processing&hellip;
+      {% else %}
+        Payment {{ order.status.lower() }}
+      {% endif %}
+    </h1>
+
+    <p class="muted">
+      {{ order.quantity }} &times; {{ order.tier.name }} &mdash; &#8377;{{ "{:,}".format(order.amount) }}
+    </p>
+
+    {% if order.status == "PAID" %}
+      <p>A confirmation has been sent to {{ order.buyer_email }}.</p>
+    {% elif order.status == "PENDING" %}
+      <p>If your payment just completed, this will update within a minute. Refresh to check again.</p>
+    {% else %}
+      <p><a href="{{ url_for('public.buy_tickets') }}" class="btn" style="margin-top: 12px;">Try again</a></p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

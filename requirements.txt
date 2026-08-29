@@ -1,0 +1,17 @@
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-Migrate==4.0.7
+Flask-WTF==1.2.1
+psycopg2-binary
+python-dotenv==1.0.1
+qrcode[pil]==7.4.2
+Pillow
+itsdangerous==2.2.0
+gunicorn==22.0.0
+requests==2.32.3
+
+# PhonePe official Python SDK is NOT on PyPI — install separately with:
+#   pip install --index-url https://phonepe.mycloudrepo.io/public/repositories/phonepe-pg-sdk-python \
+#       --extra-index-url https://pypi.org/simple phonepe_sdk
+# See README.md "PhonePe setup" section before deploying.

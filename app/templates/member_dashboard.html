@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}My dashboard{% endblock %}
+{% block content %}
+<div class="ticket">
+  <p class="ticket-eyebrow">Your referral stub</p>
+  <h1 class="ticket-title">Hey {{ member.name.split(' ')[0] }} &#128075;</h1>
+
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-value">{{ member.total_tickets_sold }}</div>
+      <div class="stat-label">Tickets sold</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">&#8377;{{ "{:,}".format(member.total_revenue) }}</div>
+      <div class="stat-label">Revenue raised</div>
+    </div>
+  </div>
+
+  <div class="perforation"></div>
+
+  <div class="qr-block">
+    <img src="{{ url_for('member.qr_code') }}" alt="Your personal QR code">
+    <div>
+      <p class="muted" style="margin: 0 0 8px;">Your code</p>
+      <span class="ref-code">{{ member.ref_code }}</span>
+      <p class="muted" style="margin: 16px 0 4px;">Share this link or the QR above</p>
+      <span class="share-link">{{ purchase_link }}</span>
+    </div>
+  </div>
+</div>
+
+<p class="muted" style="text-align:center;">Every ticket bought through your link or QR is counted here automatically.</p>
+{% endblock %}
