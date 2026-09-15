@@ -46,7 +46,7 @@
             <form method="post" action="{{ url_for('admin.toggle_member_active', member_id=m.id) }}" style="display:inline;">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit" class="btn btn-ghost btn-small">
-                {{ 'Deactivate' if m.is_active_member else 'Reactivate' }}
+                {{ 'DEA' if m.is_active_member else 'REA' }}
               </button>
             </form>
           </td>
