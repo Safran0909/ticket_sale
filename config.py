@@ -26,6 +26,9 @@ class Config:
     SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
     SMTP_FROM = os.environ.get("SMTP_FROM", SMTP_USER)
 
+    RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+    EMAIL_FROM = os.environ.get("EMAIL_FROM")
+
     PHONEPE_CLIENT_ID = os.environ.get("PHONEPE_CLIENT_ID")
     PHONEPE_CLIENT_SECRET = os.environ.get("PHONEPE_CLIENT_SECRET")
     PHONEPE_CLIENT_VERSION = int(os.environ.get("PHONEPE_CLIENT_VERSION", 1))

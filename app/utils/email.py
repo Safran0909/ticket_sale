@@ -1,38 +1,58 @@
-import smtplib
-from email.mime.text import MIMEText
+import resend
 from flask import current_app
 
 
 def send_email(to_email: str, subject: str, html_body: str, text_body: str = ""):
-    """Send an email via SMTP using settings from Config. Raises on failure
-    so callers can show an error instead of silently losing the email."""
-    cfg = current_app.config
-    if not cfg.get("SMTP_HOST"):
-        current_app.logger.warning(
-            "SMTP not configured — printing email to console instead:\n%s\n%s",
-            subject,
-            html_body,
+    api_key = current_app.config.get("RESEND_API_KEY")
+    from_email = current_app.config.get("EMAIL_FROM")
+
+    if not api_key:
+        raise RuntimeError("RESEND_API_KEY is not configured")
+
+    if not from_email:
+        raise RuntimeError("EMAIL_FROM is not configured")
+
+    resend.api_key = api_key
+
+    params = {
+        "from": from_email,
+        "to": [to_email],
+        "subject": subject,
+        "html": html_body,
+    }
+
+    if text_body:
+        params["text"] = text_body
+
+    try:
+        email = resend.Emails.send(params)
+        current_app.logger.info(
+            "Email sent successfully to %s: %s",
+            to_email,
+            email
         )
-        return
+        return email
 
-    msg = MIMEText(html_body, "html")
-    msg["Subject"] = subject
-    msg["From"] = cfg["SMTP_FROM"]
-    msg["To"] = to_email
-
-    with smtplib.SMTP(cfg["SMTP_HOST"], cfg["SMTP_PORT"]) as server:
-        server.starttls()
-        server.login(cfg["SMTP_USER"], cfg["SMTP_PASSWORD"])
-        server.sendmail(cfg["SMTP_FROM"], [to_email], msg.as_string())
+    except Exception:
+        current_app.logger.exception(
+            "Failed to send email to %s",
+            to_email
+        )
+        raise
 
 
 def send_magic_link_email(to_email: str, name: str, link: str):
     subject = "Your login link"
+
     html = f"""
     <div style="font-family: -apple-system, Segoe UI, sans-serif; max-width: 480px; margin: auto;">
       <h2 style="color:#1a1a2e;">Hi {name},</h2>
-      <p>Click the button below to log in. This link expires in 15 minutes
-      and can only be used once.</p>
+
+      <p>
+        Click the button below to log in. This link expires in 15 minutes
+        and can only be used once.
+      </p>
+
       <p style="text-align:center; margin: 32px 0;">
         <a href="{link}"
            style="background:#c9a227; color:#1a1a2e; padding:14px 28px;
@@ -41,9 +61,23 @@ def send_magic_link_email(to_email: str, name: str, link: str):
           Log in
         </a>
       </p>
+
       <p style="color:#888; font-size:13px;">
         If you didn't request this, you can safely ignore this email.
       </p>
     </div>
     """
-    send_email(to_email, subject, html)
+
+    text = f"""
+Hi {name},
+
+Click this link to log in:
+
+{link}
+
+This link expires in 15 minutes and can only be used once.
+
+If you didn't request this, you can safely ignore this email.
+"""
+
+    return send_email(to_email, subject, html, text)
