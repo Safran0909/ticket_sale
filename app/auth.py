@@ -32,7 +32,12 @@ def login():
             token = serializer.dumps({"member_id": member.id, "jti": jti})
             link = url_for("auth.verify", token=token, _external=True)
 
-            send_magic_link_email(member.email, member.name, link)
+            try:
+                send_magic_link_email(member.email, member.name, link)
+                current_app.logger.info("Magic link email sent to %s", member.email)
+            except Exception:
+                current_app.logger.exception("MAGIC LINK EMAIL FAILED")
+                raise
 
         flash("If that email is registered, a login link has been sent. Check your inbox.", "info")
         return redirect(url_for("auth.login"))
