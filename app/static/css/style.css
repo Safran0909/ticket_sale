@@ -681,41 +681,99 @@ img, svg {
   }
   
 }
-@media (max-width: 768px) {
+@media (max-width: 720px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
 
+@media (max-width: 600px) {
+    body {
+        min-height: auto;
+    }
+
+    .page {
+        flex: none;
+        padding: 16px 14px 48px;
+    }
+
+    .footer {
+        padding: 16px 20px 24px;
+    }
+
+    .promo-panel {
+        display: none;
+    }
+
+    .ticket {
+        padding: 20px;
+    }
+
+    .stepper {
+        gap: 4px;
+        justify-content: space-between;
+    }
+
+    .step-line {
+        width: 16px;
+    }
+
+    .step-label {
+        font-size: 9px;
+    }
+
+    .step-circle {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+
+    /* MOBILE HEADER */
     .topbar {
-        position: relative;
         display: flex;
+        flex-direction: row;
         align-items: center;
+        justify-content: space-between;
+        padding: 26px 20px 16px 24px;
         min-height: 70px;
-        padding: 0 20px;
     }
 
-    .topnav {
-        display: block !important;
-        position: absolute;
-        top: 50%;
-        right: 20px;
-        transform: translateY(-50%);
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .topnav .committee-login {
-        display: block !important;
-        color: #e8e8e8 !important;
-        font-family: "Inter", sans-serif !important;
-        font-size: 16px !important;
-        font-weight: 400 !important;
-        line-height: 1 !important;
-        text-decoration: none !important;
+    .brand {
+        font-size: 17px;
+        gap: 6px;
+        line-height: 1.15;
         white-space: nowrap;
     }
 
-    .topnav .committee-login:hover,
-    .topnav .committee-login:visited,
-    .topnav .committee-login:active {
-        color: #e8e8e8 !important;
+    .brand-mark {
+        font-size: 17px;
+    }
+
+    .topnav {
+        display: flex !important;
+        align-items: center;
+        margin-left: auto;
+        gap: 0;
+    }
+
+    .topnav a.committee-login {
+        display: block !important;
+
+        /* SAME AS DESKTOP */
+        font-family: var(--font-body);
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+
+        color: #ccc !important;
+        text-decoration: none !important;
+
+        white-space: nowrap;
+    }
+
+    .topnav a.committee-login:hover {
+        color: var(--teal) !important;
         text-decoration: none !important;
     }
 }
