@@ -682,29 +682,39 @@ img, svg {
   
 }
 @media (max-width: 768px) {
+
     .topbar {
+        position: relative;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        min-height: 70px;
+        padding: 0 20px;
     }
 
     .topnav {
-        display: flex !important;
-        align-items: center;
-        margin-left: auto;
+        display: block !important;
+        position: absolute;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    .committee-login {
+    .topnav .committee-login {
         display: block !important;
         color: #e8e8e8 !important;
         font-family: "Inter", sans-serif !important;
         font-size: 16px !important;
         font-weight: 400 !important;
+        line-height: 1 !important;
         text-decoration: none !important;
         white-space: nowrap;
     }
 
-    .committee-login:hover {
+    .topnav .committee-login:hover,
+    .topnav .committee-login:visited,
+    .topnav .committee-login:active {
         color: #e8e8e8 !important;
         text-decoration: none !important;
     }
