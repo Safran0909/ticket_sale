@@ -1,4 +1,5 @@
 import uuid
+from app.utils.email import send_ticket_confirmation_email
 
 from flask import (
     Blueprint, render_template, request, redirect, url_for, flash,
@@ -105,6 +106,7 @@ def verify_payment():
     if submitted_order_id != order.razorpay_order_id:
         current_app.logger.warning("Order ID mismatch for %s", merchant_order_id)
         return jsonify(error="Payment does not match this order."), 400
+
     try:
         razorpay_client.verify_payment_signature(
             data.get("razorpay_order_id", ""),
@@ -123,11 +125,22 @@ def verify_payment():
     db.session.commit()
     session.pop("ref_code", None)
 
+    try:
+        send_ticket_confirmation_email(
+            to_email=order.buyer_email,
+            buyer_name=order.buyer_name,
+            tier_name=order.tier.name,
+            quantity=order.quantity,
+            amount=order.amount,
+            merchant_order_id=order.merchant_order_id,
+        )
+    except Exception:  # noqa: BLE001
+        current_app.logger.exception("Failed to send confirmation email for %s", merchant_order_id)
+
     return jsonify(
         status="success",
         redirect=url_for("public.payment_return", order_id=merchant_order_id),
     )
-
 
 @bp.route("/payments/return")
 def payment_return():
@@ -174,8 +187,22 @@ def payment_webhook():
         return "ok", 200
 
     if event_type in ("payment.captured", "order.paid"):
+        was_already_paid = order.status == "PAID"
         order.status = "PAID"
         order.payment_transaction_id = payment_id
+
+        if not was_already_paid:
+            try:
+                send_ticket_confirmation_email(
+                    to_email=order.buyer_email,
+                    buyer_name=order.buyer_name,
+                    tier_name=order.tier.name,
+                    quantity=order.quantity,
+                    amount=order.amount,
+                    merchant_order_id=order.merchant_order_id,
+                )
+            except Exception:  # noqa: BLE001
+                current_app.logger.exception("Failed to send confirmation email for %s", merchant_order_id)
     elif event_type == "payment.failed":
         order.status = "FAILED"
 
