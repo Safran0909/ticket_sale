@@ -11,6 +11,7 @@ itsdangerous==2.2.0
 gunicorn==22.0.0
 requests==2.32.3
 resend
+razorpay==2.0.1
 
 # PhonePe official Python SDK is NOT on PyPI — install separately with:
 #   pip install --index-url https://phonepe.mycloudrepo.io/public/repositories/phonepe-pg-sdk-python \
