@@ -16,16 +16,28 @@
       <span class="brand-mark">&#127915;</span> {{ app_name }}
     </a>
     <nav class="topnav">
-      {% if current_user.is_authenticated %}
-        {% if current_user.is_admin %}
-          <a href="{{ url_for('admin.dashboard') }}">Admin</a>
-        {% endif %}
-        <a href="{{ url_for('member.dashboard') }}">My dashboard</a>
-        <a href="{{ url_for('auth.logout') }}">Log out</a>
-      {% else %}
-        <a class="committee-login" href="{{ url_for('auth.login') }}">Committee login</a>
-      {% endif %}
-    </nav>
+  {% if current_user.is_authenticated %}
+
+    {% if current_user.is_admin %}
+      <a class="nav-admin" href="{{ url_for('admin.dashboard') }}">Admin</a>
+    {% endif %}
+
+    <a class="nav-dashboard" href="{{ url_for('member.dashboard') }}">
+      My dashboard
+    </a>
+
+    <a class="nav-logout" href="{{ url_for('auth.logout') }}">
+      Log out
+    </a>
+
+  {% else %}
+
+    <a class="committee-login" href="{{ url_for('auth.login') }}">
+      Committee login
+    </a>
+
+  {% endif %}
+</nav>
   </header>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
