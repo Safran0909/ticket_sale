@@ -29,12 +29,9 @@ class Config:
     RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
     EMAIL_FROM = os.environ.get("EMAIL_FROM")
 
-    PHONEPE_CLIENT_ID = os.environ.get("PHONEPE_CLIENT_ID")
-    PHONEPE_CLIENT_SECRET = os.environ.get("PHONEPE_CLIENT_SECRET")
-    PHONEPE_CLIENT_VERSION = int(os.environ.get("PHONEPE_CLIENT_VERSION", 1))
-    PHONEPE_ENV = os.environ.get("PHONEPE_ENV", "SANDBOX")  # SANDBOX | PRODUCTION
-    PHONEPE_WEBHOOK_USERNAME = os.environ.get("PHONEPE_WEBHOOK_USERNAME")
-    PHONEPE_WEBHOOK_PASSWORD = os.environ.get("PHONEPE_WEBHOOK_PASSWORD")
+    RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID")
+    RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET")
+    RAZORPAY_WEBHOOK_SECRET = os.environ.get("RAZORPAY_WEBHOOK_SECRET")
 
     ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "").lower().strip()
 

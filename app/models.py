@@ -98,6 +98,8 @@ class Order(db.Model):
     buyer_email = db.Column(db.String(255), nullable=False)
     buyer_phone = db.Column(db.String(20), nullable=False)
 
+# models.py, in Order
+    razorpay_order_id = db.Column(db.String(64), nullable=True, index=True)
     tier_id = db.Column(db.Integer, db.ForeignKey("ticket_tiers.id"), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
     amount = db.Column(db.Integer, nullable=False)  # total paise->rupees, whole rupees
@@ -107,7 +109,7 @@ class Order(db.Model):
     status = db.Column(db.String(20), nullable=False, default="PENDING", index=True)
     # PENDING, PAID, FAILED, EXPIRED
 
-    phonepe_transaction_id = db.Column(db.String(120), nullable=True)
+    payment_transaction_id = db.Column(db.String(120), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), default=utcnow)
     updated_at = db.Column(db.DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 

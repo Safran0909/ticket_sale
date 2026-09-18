@@ -57,17 +57,17 @@
 
   <div class="ticket checkout-panel">
     <div class="stepper">
-      <div class="step step-active">
+      <div class="step step-active" id="step-1">
         <span class="step-circle">1</span>
         <span class="step-label">Ticket</span>
       </div>
       <div class="step-line"></div>
-      <div class="step">
+      <div class="step" id="step-2">
         <span class="step-circle">2</span>
         <span class="step-label">Payment</span>
       </div>
       <div class="step-line"></div>
-      <div class="step">
+      <div class="step" id="step-3">
         <span class="step-circle">3</span>
         <span class="step-label">Confirm</span>
       </div>
@@ -76,8 +76,8 @@
     {% if not tiers %}
       <p class="muted">Ticket sales haven't opened yet — check back soon.</p>
     {% else %}
-    <form method="post" action="{{ url_for('public.checkout') }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <form id="checkout-form">
+      <p id="checkout-error" class="flash flash-error" style="display:none; margin-bottom:16px;"></p>
 
       <p class="section-label">Choose your ticket</p>
       <div class="tier-grid tier-grid-single">
@@ -129,16 +129,141 @@
         <input type="tel" id="buyer_phone" name="buyer_phone" placeholder="Enter your 10-digit mobile number" required>
       </div>
 
-      <button type="submit" class="btn btn-block btn-pay">
-        Pay with PhonePe
+      <button type="submit" class="btn btn-block btn-pay" id="pay-button">
+        <span id="pay-button-text">Pay with Razorpay</span>
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
       </button>
       <p class="secure-note">
         <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-        Secure payments powered by PhonePe
+        Secure payments powered by Razorpay
       </p>
     </form>
     {% endif %}
   </div>
 </div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+(function () {
+  const form = document.getElementById("checkout-form");
+  if (!form) return;  // no tiers available, form wasn't rendered
+
+  const payButton = document.getElementById("pay-button");
+  const payButtonText = document.getElementById("pay-button-text");
+  const errorBox = document.getElementById("checkout-error");
+
+  function showError(message) {
+    errorBox.textContent = message;
+    errorBox.style.display = "block";
+  }
+
+  function clearError() {
+    errorBox.style.display = "none";
+    errorBox.textContent = "";
+  }
+
+  function setLoading(isLoading, label) {
+    payButton.disabled = isLoading;
+    payButtonText.textContent = label;
+  }
+
+  function csrfHeaders() {
+    return {
+      "Content-Type": "application/json",
+      "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content,
+    };
+  }
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    clearError();
+    setLoading(true, "Starting checkout…");
+
+    const formData = new FormData(form);
+    const body = {
+      tier_id: formData.get("tier_id"),
+      quantity: formData.get("quantity") || 1,
+      buyer_name: formData.get("buyer_name"),
+      buyer_email: formData.get("buyer_email"),
+      buyer_phone: formData.get("buyer_phone"),
+    };
+
+    let orderResp;
+    try {
+      const res = await fetch("{{ url_for('public.create_order') }}", {
+        method: "POST",
+        headers: csrfHeaders(),
+        body: JSON.stringify(body),
+      });
+      orderResp = await res.json();
+      if (!res.ok) throw new Error(orderResp.error || "Could not start payment.");
+    } catch (err) {
+      showError(err.message);
+      setLoading(false, "Pay with Razorpay");
+      return;
+    }
+
+    document.getElementById("step-2").classList.add("step-active");
+
+    const options = {
+      key: orderResp.key_id,
+      amount: orderResp.amount,
+      currency: orderResp.currency,
+      name: "{{ app_name }}",
+      description: "Event ticket purchase",
+      order_id: orderResp.order_id,
+      prefill: {
+        name: orderResp.buyer_name,
+        email: orderResp.buyer_email,
+        contact: orderResp.buyer_phone,
+      },
+      theme: { color: "#6dff00" },
+      modal: {
+        ondismiss: function () {
+          // buyer closed the modal without paying — let them try again
+          setLoading(false, "Pay with Razorpay");
+          document.getElementById("step-2").classList.remove("step-active");
+        },
+      },
+      handler: async function (response) {
+        setLoading(true, "Confirming payment…");
+        try {
+          const verifyRes = await fetch("{{ url_for('public.verify_payment') }}", {
+            method: "POST",
+            headers: csrfHeaders(),
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              merchant_order_id: orderResp.merchant_order_id,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyRes.ok && verifyData.status === "success") {
+            document.getElementById("step-3").classList.add("step-active");
+            window.location.href = verifyData.redirect;
+          } else {
+            showError(verifyData.error || "We couldn't confirm your payment. Please contact support.");
+            setLoading(false, "Pay with Razorpay");
+          }
+        } catch (err) {
+          showError("Something went wrong confirming your payment. If money was deducted, contact support with your details.");
+          setLoading(false, "Pay with Razorpay");
+        }
+      },
+    };
+
+    const rzp = new Razorpay(options);
+
+    rzp.on("payment.failed", function (resp) {
+      showError("Payment failed: " + resp.error.description);
+      setLoading(false, "Pay with Razorpay");
+      document.getElementById("step-2").classList.remove("step-active");
+    });
+
+    setLoading(false, "Pay with Razorpay");
+    rzp.open();
+  });
+})();
+</script>
 {% endblock %}

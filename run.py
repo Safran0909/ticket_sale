@@ -29,3 +29,4 @@ def seed_admin(name, email):
 
 if __name__ == "__main__":
     app.run(debug=os.environ.get("FLASK_ENV") != "production", port=5000)
+
