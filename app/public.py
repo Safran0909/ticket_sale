@@ -120,22 +120,26 @@ def verify_payment():
         current_app.logger.exception("Verification error for %s", merchant_order_id)
         return jsonify(error="Something went wrong verifying your payment."), 502
 
+    # ---- NEW: only send the email once, whichever path (webhook or here) gets there first ----
+    was_already_paid = order.status == "PAID"
     order.status = "PAID"
     order.payment_transaction_id = data.get("razorpay_payment_id", "")
     db.session.commit()
     session.pop("ref_code", None)
 
-    try:
-        send_ticket_confirmation_email(
-            to_email=order.buyer_email,
-            buyer_name=order.buyer_name,
-            tier_name=order.tier.name,
-            quantity=order.quantity,
-            amount=order.amount,
-            merchant_order_id=order.merchant_order_id,
-        )
-    except Exception:  # noqa: BLE001
-        current_app.logger.exception("Failed to send confirmation email for %s", merchant_order_id)
+    if not was_already_paid:
+        try:
+            send_ticket_confirmation_email(
+                to_email=order.buyer_email,
+                buyer_name=order.buyer_name,
+                tier_name=order.tier.name,
+                quantity=order.quantity,
+                amount=order.amount,
+                merchant_order_id=order.merchant_order_id,
+            )
+        except Exception:  # noqa: BLE001
+            current_app.logger.exception("Failed to send confirmation email for %s", merchant_order_id)
+    # -----------------------------------------------------------------------------------------
 
     return jsonify(
         status="success",
