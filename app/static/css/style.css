@@ -606,81 +606,31 @@ canvas#trendChart { max-width: 100%; }
 /* ---------- Mobile fixes ---------- */
 /* ---------- Hide scrollbar visually (page still scrolls normally) ---------- */
 
+/* ---------- Mobile fixes ---------- */
+
 html {
-  scrollbar-width: none;       /* Firefox */
-  -ms-overflow-style: none;    /* old Edge/IE */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 html::-webkit-scrollbar {
-  display: none;               /* Chrome, Safari, new Edge */
+    display: none;
 }
 
 html, body {
-  overflow-x: hidden;
-  max-width: 100%;
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 img, svg {
-  max-width: 100%;
-  height: auto;
+    max-width: 100%;
+    height: auto;
 }
 
 * {
-  min-width: 0;
+    min-width: 0;
 }
 
-@media (max-width: 600px) {
-   body {
-    min-height: auto;
-  }
-  .page {
-    flex: none;
-  }
-  .footer {
-    padding: 16px 20px 24px;
-  }
-  .promo-panel {
-    display: none;
-  }
-  .page {
-    padding: 16px 14px 48px;
-  }
-  .ticket {
-    padding: 20px;
-  }
-  .stepper {
-    gap: 4px;
-    justify-content: space-between;
-  }
-  .step-line {
-    width: 16px;
-  }
-  .step-label {
-    font-size: 9px;
-  }
-  .step-circle {
-    width: 24px;
-    height: 24px;
-    font-size: 11px;
-  }
-
-  .topbar {
-  padding: 26px 20px 16px 24px;
-}
-  .brand {
-    font-size: 17px;
-    gap: 6px;
-    line-height: 1.15;
-    white-space: normal;
-  }
-  .brand-mark {
-    font-size: 17px;
-  }
-  .topnav a {
-    display: none;
-  }
-  
-}
 @media (max-width: 720px) {
     .grid-2 {
         grid-template-columns: 1fr;
@@ -688,6 +638,7 @@ img, svg {
 }
 
 @media (max-width: 600px) {
+
     body {
         min-height: auto;
     }
@@ -728,7 +679,8 @@ img, svg {
         font-size: 11px;
     }
 
-    /* MOBILE HEADER */
+    /* ---------- MOBILE HEADER ---------- */
+
     .topbar {
         display: flex;
         flex-direction: row;
@@ -756,23 +708,19 @@ img, svg {
         gap: 0;
     }
 
-    .topnav a.committee-login {
+    .topnav .committee-login {
         display: block !important;
-
-        /* SAME AS DESKTOP */
-        font-family: var(--font-body);
-        font-size: 13px;
-        font-weight: 500;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-
+        font-family: var(--font-body) !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.05em !important;
+        text-transform: uppercase !important;
         color: #ccc !important;
         text-decoration: none !important;
-
         white-space: nowrap;
     }
 
-    .topnav a.committee-login:hover {
+    .topnav .committee-login:hover {
         color: var(--teal) !important;
         text-decoration: none !important;
     }
