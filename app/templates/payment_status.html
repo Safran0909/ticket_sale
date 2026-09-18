@@ -12,22 +12,22 @@
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
   }
 
   .ticket-stub {
     position: relative;
-    width: 100%;
     max-width: 480px;
+    margin: 60px auto 0;
     background: radial-gradient(ellipse at top, rgba(109,255,0,0.08), rgba(0,0,0,0.95));
     border: 1px solid rgba(109,255,0,0.35);
     border-radius: 20px;
     padding: 40px 32px 32px;
     text-align: center;
     box-shadow: 0 0 40px rgba(109,255,0,0.08);
+  }
+  .ticket-stub.is-failed {
+    border-color: rgba(255,77,77,0.35);
+    box-shadow: 0 0 40px rgba(255,77,77,0.06);
   }
 
   .ticket-stub::before,
@@ -42,6 +42,10 @@
     border: 1px solid rgba(109,255,0,0.35);
     border-radius: 50%;
   }
+  .ticket-stub.is-failed::before,
+  .ticket-stub.is-failed::after {
+    border-color: rgba(255,77,77,0.35);
+  }
   .ticket-stub::before { left: -14px; }
   .ticket-stub::after { right: -14px; }
 
@@ -51,7 +55,6 @@
     height: 84px;
     margin: 0 auto 8px;
   }
-
   .status-icon-circle {
     width: 84px;
     height: 84px;
@@ -62,28 +65,19 @@
     justify-content: center;
     box-shadow: 0 0 24px rgba(109,255,0,0.35);
   }
-
   .status-icon-circle.is-failed {
     border-color: #ff4d4d;
     box-shadow: 0 0 24px rgba(255,77,77,0.3);
   }
+  .status-icon-circle svg { width: 36px; height: 36px; }
 
-  .status-icon-circle svg {
-    width: 36px;
-    height: 36px;
-  }
-
-  .confetti-spark {
-    position: absolute;
-    font-size: 14px;
-    opacity: 0.85;
-  }
+  .confetti-spark { position: absolute; font-size: 14px; opacity: 0.85; }
   .confetti-spark.c1 { top: -4px; left: -18px; }
   .confetti-spark.c2 { top: -10px; right: -20px; }
   .confetti-spark.c3 { bottom: -6px; left: -22px; }
   .confetti-spark.c4 { bottom: -10px; right: -16px; }
 
-  .order-label {
+  .ticket-eyebrow.stub-label {
     text-transform: uppercase;
     letter-spacing: 2px;
     font-size: 12px;
@@ -105,7 +99,7 @@
     word-break: break-all;
   }
 
-  .status-badge {
+  .status-pill {
     display: inline-block;
     padding: 5px 18px;
     border-radius: 999px;
@@ -114,26 +108,31 @@
     letter-spacing: 1px;
     margin-bottom: 22px;
   }
-  .status-badge.paid {
+  .status-pill.status-PAID {
     background: rgba(109,255,0,0.15);
     color: #6dff00;
     border: 1px solid rgba(109,255,0,0.4);
   }
-  .status-badge.other {
+  .status-pill.status-PENDING {
+    background: rgba(255,214,0,0.12);
+    color: #ffd966;
+    border: 1px solid rgba(255,214,0,0.35);
+  }
+  .status-pill:not(.status-PAID):not(.status-PENDING) {
     background: rgba(255,77,77,0.15);
     color: #ff8080;
     border: 1px solid rgba(255,77,77,0.4);
   }
 
-  .hero-line {
-    font-family: inherit;
+  .ticket-title.hero-line {
     font-weight: 900;
     font-size: 30px;
     letter-spacing: 0.5px;
-    margin-bottom: 24px;
+    margin: 0 0 24px;
   }
-  .hero-line.success { color: #6dff00; }
-  .hero-line.failure { color: #ff8080; }
+  .ticket-title.hero-line.success { color: #6dff00; }
+  .ticket-title.hero-line.failure { color: #ff8080; }
+  .ticket-title.hero-line.pending { color: #ffd966; }
 
   .order-summary-row {
     display: flex;
@@ -171,9 +170,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="ticket-stub">
-  {% if order.status == "PAID" %}
-    <div class="status-icon-wrap">
+<div class="ticket-stub {% if order.status not in ('PAID', 'PENDING') %}is-failed{% endif %}">
+
+  <div class="status-icon-wrap">
+    {% if order.status == "PAID" %}
       <span class="confetti-spark c1">🎉</span>
       <span class="confetti-spark c2">✨</span>
       <span class="confetti-spark c3">🎊</span>
@@ -183,48 +183,55 @@
           <polyline points="20 6 9 17 4 12"/>
         </svg>
       </div>
-    </div>
+    {% elif order.status == "PENDING" %}
+      <div class="status-icon-circle" style="border-color:#ffd966; box-shadow:0 0 24px rgba(255,214,0,0.3);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ffd966" stroke-width="3">
+          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
+        </svg>
+      </div>
+    {% else %}
+      <div class="status-icon-circle is-failed">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="3">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </div>
+    {% endif %}
+  </div>
 
-    <p class="order-label">Order</p>
-    <div class="order-id-pill">{{ order.merchant_order_id }}</div>
-    <div><span class="status-badge paid">PAID</span></div>
+  <p class="ticket-eyebrow stub-label">Order</p>
+  <div class="order-id-pill">{{ order.merchant_order_id }}</div>
+  <span class="status-pill status-{{ order.status }}">{{ order.status }}</span>
 
-    <p class="hero-line success">You're in! 🎉</p>
+  <h1 class="ticket-title hero-line {% if order.status == 'PAID' %}success{% elif order.status == 'PENDING' %}pending{% else %}failure{% endif %}">
+    {% if order.status == "PAID" %}
+      You're in! 🎉
+    {% elif order.status == "PENDING" %}
+      Payment processing&hellip;
+    {% else %}
+      Payment {{ order.status.lower() }}
+    {% endif %}
+  </h1>
 
-    <div class="order-summary-row">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"/>
-      </svg>
-      <span>{{ order.quantity }} × {{ order.tier.name }} &mdash; &#8377;{{ "{:,}".format(order.amount) }}</span>
-    </div>
+  <div class="order-summary-row">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"/>
+    </svg>
+    <span>{{ order.quantity }} × {{ order.tier.name }} &mdash; &#8377;{{ "{:,}".format(order.amount) }}</span>
+  </div>
 
+  {% if order.status == "PAID" %}
     <hr class="stub-divider">
-
     <div class="confirmation-line">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>
       </svg>
       <span>A confirmation has been sent to <strong>{{ order.buyer_email }}</strong>.</span>
     </div>
-
+  {% elif order.status == "PENDING" %}
+    <p class="muted">If your payment just completed, this will update within a minute. Refresh to check again.</p>
   {% else %}
-    <div class="status-icon-wrap">
-      <div class="status-icon-circle is-failed">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="3">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </div>
-    </div>
-
-    <p class="order-label">Order</p>
-    <div class="order-id-pill">{{ order.merchant_order_id }}</div>
-    <div><span class="status-badge other">{{ order.status }}</span></div>
-
-    <p class="hero-line failure">Payment not completed</p>
-
-    <div class="order-summary-row">
-      <span>If money was deducted, contact support with this order ID.</span>
-    </div>
+    <p><a href="{{ url_for('public.buy_tickets') }}" class="btn" style="margin-top: 12px;">Try again</a></p>
   {% endif %}
+
 </div>
 {% endblock %}
