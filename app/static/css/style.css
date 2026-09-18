@@ -681,21 +681,14 @@ img, svg {
   }
   
 }
-.committee-login {
-    display: none;
-}
-
 @media (max-width: 768px) {
-    .committee-login {
-        display: flex;
-        justify-content: flex-end;
-        padding: 12px 16px 0;
+    .topnav {
+        display: flex !important;
     }
 
-    .committee-login a {
-        color: #6dff00;
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 600;
+    .committee-login {
+        display: block !important;
+        font-size: 11px;
+        white-space: nowrap;
     }
 }
