@@ -682,13 +682,30 @@ img, svg {
   
 }
 @media (max-width: 768px) {
+    .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
     .topnav {
         display: flex !important;
+        align-items: center;
+        margin-left: auto;
     }
 
     .committee-login {
         display: block !important;
-        font-size: 11px;
+        color: #e8e8e8 !important;
+        font-family: "Inter", sans-serif !important;
+        font-size: 16px !important;
+        font-weight: 400 !important;
+        text-decoration: none !important;
         white-space: nowrap;
+    }
+
+    .committee-login:hover {
+        color: #e8e8e8 !important;
+        text-decoration: none !important;
     }
 }
